@@ -1,5 +1,9 @@
+import 'package:chat_app/helpers/mostrar_alerta.dart';
+import 'package:chat_app/services/auth_service.dart';
+
 import 'package:flutter/material.dart';
 import 'package:chat_app/widgets/widgets_export.dart';
+import 'package:provider/provider.dart';
 
 class LoginPage extends StatelessWidget {
   @override
@@ -44,6 +48,8 @@ class __FormState extends State<_Form> {
 
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context);
+
     return Container(
       margin: EdgeInsets.only(top: 40),
       padding: EdgeInsets.symmetric(horizontal: 50),
@@ -58,15 +64,24 @@ class __FormState extends State<_Form> {
           CustomInput(
             icon: Icons.lock_outlined,
             placeholder: 'Password',
-            //keyboardType: TextInputType.emailAddress,
             textController: passCtrl,
             isPassword: true,
           ),
           LoginButton(
             text: 'Ingresar',
-            onPressed: () {
-              print(emailCtrl.text);
-              print(passCtrl.text);
+            onPressed: () async {
+              FocusScope.of(context).unfocus();
+              final loginOk = await authService.login(
+                  emailCtrl.text.trim(), passCtrl.text.trim());
+
+              if (loginOk) {
+                //TODO: Conectar a nuestro Socket Server
+                Navigator.pushReplacementNamed(context, 'usuarios');
+              } else {
+                //Mostrar Alerta
+                mostrarAlerta(
+                    context, 'Login incorrecto', 'Revise sus credenciales');
+              }
             },
           ),
         ],
